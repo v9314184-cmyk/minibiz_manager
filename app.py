@@ -20,13 +20,13 @@ def home():
 
         return redirect("/")
 
-    profit = income_total - expense_total
-    return render_template(
-        "index.html",
-        income=income_total,
-        expense=expense_total,
-        profit=profit
-    )
+        profit = income_total - expense_total
+        return render_template(
+            "index.html",
+            income=income_total,
+            expense=expense_total,
+            profit=profit
+        )
 
 if __name__ == "__main__":
     app.run()
