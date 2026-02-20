@@ -1,35 +1,21 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-records = []
+transactions = []
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def home():
-    income = sum(r["amount"] for r in records if r["type"] == "income")
-    expense = sum(r["amount"] for r in records if r["type"] == "expense")
+    if request.method == "POST":
+        amount = float(request.form["amount"])
+        category = request.form["category"]
+        transactions.append((amount, category))
+
+    income = sum(t[0] for t in transactions if t[1] == "income")
+    expense = sum(t[0] for t in transactions if t[1] == "expense")
     profit = income - expense
 
-    return render_template(
-        "index.html",
-        records=records,
-        income=income,
-        expense=expense,
-        profit=profit
-    )
+    return render_template("index.html", income=income, expense=expense, profit=profit)
 
-@app.route("/add", methods=["POST"])
-def add():
-    description = request.form["description"]
-    amount = float(request.form["amount"])
-    record_type = request.form["type"]
-
-    records.append({
-        "description": description,
-        "amount": amount,
-        "type": record_type
-    })
-
-    return redirect("/")
-    if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+if __name__ == "__main__":
+    app.run(debug=True)
