@@ -2,31 +2,32 @@ from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
 
-income_total = 0
-expense_total = 0
+records = []
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def home():
-    global income_total, expense_total
+    income = sum(r["amount"] for r in records if r["type"] == "income")
+    expense = sum(r["amount"] for r in records if r["type"] == "expense")
+    profit = income - expense
 
-    if request.method == "POST":
-        amount = float(request.form["amount"])
-        category = request.form["category"]
+    return render_template(
+        "index.html",
+        records=records,
+        income=income,
+        expense=expense,
+        profit=profit
+    )
 
-        if category == "income":
-            income_total += amount
-        else:
-            expense_total += amount
+@app.route("/add", methods=["POST"])
+def add():
+    description = request.form["description"]
+    amount = float(request.form["amount"])
+    record_type = request.form["type"]
 
-        return redirect("/")
+    records.append({
+        "description": description,
+        "amount": amount,
+        "type": record_type
+    })
 
-        profit = income_total - expense_total
-        return render_template(
-            "index.html",
-            income=income_total,
-            expense=expense_total,
-            profit=profit
-        )
-
-if __name__ == "__main__":
-    app.run()
+    return redirect("/")
